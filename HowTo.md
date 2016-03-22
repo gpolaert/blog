@@ -72,11 +72,23 @@ Multu-line support is only available on `imfile` module. So, your logs need to b
 in a specific file before be parsed and sent to syslog daemon. Send logs to a facility (local0 for instance),
 won't work.
 
-```properties
-imfile(
+In order to enable multi-line, you need to use the inline syntax. There is no directives. 
 
-)
+
+```properties
+module(load="imfile" PollingInterval="10") #needs to be done just once
+
+# File 1
+input(type="imfile"
+      File="/app/log"
+      Tag="tag1-inline"
+      Severity="info"
+      startmsg.regex="^[A-Z]+: "
+      )
+
 ```
+Note, that the breaking rule is "A new line starts by an uppercase word jsut follow by ":". If you want to 
+be more precise, try `^((LOG)|(DEBUG)|(WARNING)|(FATAL)|(ERROR)|(STATEMENT)): `.
 
 ### Syslog-ng
 
