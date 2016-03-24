@@ -92,6 +92,22 @@ be more precise, try `^((LOG)|(DEBUG)|(WARNING)|(FATAL)|(ERROR)|(STATEMENT)): `.
 
 ### Syslog-ng
 
+```properties
+
+template LogmaticFormat { template("YOUR_API_KEY <${PRI}>1 ${ISODATE} ${HOST:--} ${PROGRAM:--} ${PID:--} ${MSGID:--} ${SDATA:--} $(replace-delimiter \"\n\" \" \" \"${MSG}\")\n"); };
+destination d_logmatic { network("api.logmatic.io" port(10514) template(LogmaticFormat)); };
+
+source s_files {
+  file(
+        "/app/log"
+         flags(no-parse)
+         multi-line-mode(prefix-garbage)
+         multi-line-prefix("^((STATEMENT)|(LOG)|(DEBUG)|(FATAL)|(ERROR)|(WARNING)|([A-Z]+)):")
+  );
+};
+
+```
+
 
 ### Fluentd
 
@@ -114,8 +130,8 @@ On the above input, this configuration
   pos_file /var/log/td-agent/postgresql.log.pos
   tag postgres
   format multiline
-  format_firstline /^(STATEMENT|LOG|DEBUG|FATAL|ERROR|WARNING|[A-Z]+):/
-  format1 /^(?<severity>(STATEMENT|LOG|DEBUG|FATAL|ERROR|WARNING|[A-Z]+)): (?<message>.*)$/
+  format_firstline /^((STATEMENT)|(LOG)|(DEBUG)|(FATAL)|(ERROR)|(WARNING)|([A-Z]+)):/
+  format1 /^(?<severity>((STATEMENT)|(LOG)|(DEBUG)|(FATAL)|(ERROR)|(WARNING)|([A-Z]+))): (?<message>.*)$/
   time_format %b %d %H:%M:%S
 </source>
 ```
