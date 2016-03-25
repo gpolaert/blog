@@ -231,7 +231,7 @@ The syntax and the line-breake rule differ a bit. The configure logstash to agre
 the pattern (`pattern => ...`) are merged to the previous line (`what => previous`).
 
 
-```json
+```
 
 input {
   file {
