@@ -9,7 +9,7 @@ In this post, I'm going to show how handle multi lines with the common log shipp
 * nxlo (soon)
 
 
-I will illustrated each shippers with two common examples: Java error stacks and PostgreSQL log events.
+I will illustrated each shippers with two common examples: Java error stacks (soon) and PostgreSQL log events.
 Java and Postgres are quite good produces multi-line logs, for SQL queries, or for THE NullPointerException.
 Parsing multi-line to collect them into a single event can be rapidly a nightmare.
 
@@ -94,11 +94,33 @@ module(load="imfile" PollingInterval="10") #needs to be done just once
 
 # File 1
 input(type="imfile"
-      File="/app/log"
-      Tag="tag1-inline"
-      Severity="info"
-      startmsg.regex="^((STATEMENT)|(LOG)|(DEBUG)|(FATAL)|(ERROR)|(WARNING)|([A-Z]+)): "
-      )
+  File="/app/log"
+  Tag="tag1-inline"
+  Severity="info"
+  startmsg.regex="^((STATEMENT)|(LOG)|(DEBUG)|(FATAL)|(ERROR)|(WARNING)|([A-Z]+)): "
+)
+```
+
+Here, the output events received by Logmatic.io.
+![syslog-ng @ logmatic.io](img/rsyslog-output.png)
+
+
+
+Note that the newlines have been replace by `\\n`.
+
+```json
+{
+  "syslog": {
+    "severity": 6,
+    "hostname": "a69d5177f3ac",
+    "appname": "tag1-inline",
+    "prival": 134,
+    "facility": 16,
+    "version": 0,
+    "timestamp": "2016-03-25T11:24:44.530Z"
+  },
+  "message": "STATEMENT:  select\t  sum(bar) as total\\n\tfrom\\n\t  foo my_table\\n\twhere\\n\t  bar <> 1;\\n"
+}
 
 ```
 
@@ -120,18 +142,18 @@ I'm going to show you how to configure the `prefix-garbage` mode.
 ```properties
 # define your own template (Logmatic.io here)
 template LogmaticFormat { 
-    template("YOUR_API_KEY <${PRI}>1 ${ISODATE} ${HOST:--} ${PROGRAM:--} ${PID:--} ${MSGID:--} ${SDATA:--} ${MSG}\n");
+  template("YOUR_API_KEY <${PRI}>1 ${ISODATE} ${HOST:--} ${PROGRAM:--} ${PID:--} ${MSGID:--} ${SDATA:--} ${MSG}\n");
 };
 
 
 # define a tcp output (to Logmatic.io here)
 destination d_logmatic { 
-    network(
-        "api.logmatic.io"
-        port(10514)
-        template(LogmaticFormat)
-        flags(no-multi-line) # force syslog-ng to send without \n char. Here newlines are replace with tabs.
-    );
+  network(
+    "api.logmatic.io"
+    port(10514)
+    template(LogmaticFormat)
+    flags(no-multi-line) # force syslog-ng to send without \n char. Here newlines are replace with spaces.
+  ;
 };
 
 source s_files {
@@ -145,10 +167,25 @@ source s_files {
 
 ```
 
-Here, the output events received by Logmatic.io. Note that the newlines have been replace by tabs.
+Here, the output events received by Logmatic.io.
 ![syslog-ng @ logmatic.io](img/syslog-ng-output.png)
 
+Note that the newlines have been replace by spaces.
 
+```json
+{
+  "syslog": {
+    "severity": 5,
+    "hostname": "02d8bc6d7e03",
+    "prival": 13,
+    "facility": 1,
+    "version": 1,
+    "timestamp": "2016-03-25T10:32:39.000Z"
+  },
+  "message": "STATEMENT:  select \t  sum(bar) as total \tfrom \t  foo my_table \twhere \t  bar <> 1;"
+}
+
+```
 
 
 ### Fluentd
@@ -182,6 +219,40 @@ Will produce these events
 
 ```json
 
-
 ```
 ### Logstash
+
+The previous versions of Logstash could handle multiines and multistreams support. *In fact, the [multiline filter](https://www.elastic.co/guide/en/logstash/current/plugins-filters-multiline.html) is deprecated*.
+Logstash can handle mulitline only with the [multiline codec](https://www.elastic.co/guide/en/logstash/current/plugins-codecs-multiline.html). 
+
+The multiline codec can be apply to a file or an input. Its behavior is similar to rsyslog, fluentd, and so on.
+
+The syntax and the line-breake rule differ a bit. The configure logstash to agregate all lines that don't start (`negate => true`) with
+the pattern (`pattern => ...`) are merged to the previous line (`what => previous`).
+
+
+```json
+
+input {
+  file {
+    "path" => "/path/to/pg_log/postgres.log"
+    "sincedb_path" => "/path/to/pg_log/sincedb_pgsql"
+    
+    # fix up multiple lines in log output into one entry    
+     codec => multiline {
+       pattern => "(?<severity>((STATEMENT)|(LOG)|(DEBUG)|(FATAL)|(ERROR)|(WARNING)|([A-Z]+))): "
+       what => previous
+       negate => true
+     }
+  }
+}
+
+filter {
+  # your filters and enrichments ...
+}
+
+output {
+  # your output to Logmatic.io :) 
+}
+```
+
