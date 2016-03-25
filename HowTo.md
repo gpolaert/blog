@@ -53,12 +53,26 @@ Then restart your postgres server.
 ## Parse PostgreSQL multi-lines
 Before start, let's see how logs look like, `tail $PG_DATA/pg_log/postgresql.log`.
 
+```sql
+select 
+  sum(bar) as total
+from
+  foo my_table
+where
+  bar <> 1;
+
+```
+
+
 ```
 2016-03-21 11:22:09 UTC postgres[423]: DEBUG:  name: unnamed; blockState:       STARTED; state: INPROGR, xid/subid/cid: 0/1/0, nestlvl: 1, children:
 2016-03-21 11:22:10 UTC postgres[423]: DEBUG:  StartTransactionCommand
-2016-03-21 11:22:10 UTC postgres[423]: STATEMENT:  select *
+2016-03-21 11:22:10 UTC postgres[423]: STATEMENT:  select 
+            sum(bar) as total
         from
-        foo;
+            foo my_table
+        where
+            bar <> 1;
 2016-03-21 11:22:10 UTC postgres[423]: DEBUG:  StartTransaction
 ...
 ```
@@ -83,19 +97,42 @@ input(type="imfile"
       File="/app/log"
       Tag="tag1-inline"
       Severity="info"
-      startmsg.regex="^[A-Z]+: "
+      startmsg.regex="^((STATEMENT)|(LOG)|(DEBUG)|(FATAL)|(ERROR)|(WARNING)|([A-Z]+)): "
       )
 
 ```
-Note, that the breaking rule is "A new line starts by an uppercase word jsut follow by ":". If you want to 
-be more precise, try `^((LOG)|(DEBUG)|(WARNING)|(FATAL)|(ERROR)|(STATEMENT)): `.
 
 ### Syslog-ng
 
-```properties
+Syslog-ng works similar to rsyslog.
+You can choose between 2 multiline modes, the `prefix-garbage` and the `prefix-suffix`.
 
-template LogmaticFormat { template("YOUR_API_KEY <${PRI}>1 ${ISODATE} ${HOST:--} ${PROGRAM:--} ${PID:--} ${MSGID:--} ${SDATA:--} $(replace-delimiter \"\n\" \" \" \"${MSG}\")\n"); };
-destination d_logmatic { network("api.logmatic.io" port(10514) template(LogmaticFormat)); };
+`prefix-garbage` acts similary to rsyslog behavior, you define a prefix line-breaker. When this prefix is reach
+syslog-ng starts a new event until it finds a new prefix line-breaker. `prefix-suffix` uses a suffix to detect the event end.
+All events not encapsulated by the prefix/suffix are simply ignored.
+
+
+Read the [documentation](https://www.balabit.com/sites/default/files/documents/syslog-ng-ose-latest-guides/en/syslog-ng-ose-guide-admin/html/reference-source-file.html) for more details. 
+
+I'm going to show you how to configure the `prefix-garbage` mode.
+
+
+```properties
+# define your own template (Logmatic.io here)
+template LogmaticFormat { 
+    template("YOUR_API_KEY <${PRI}>1 ${ISODATE} ${HOST:--} ${PROGRAM:--} ${PID:--} ${MSGID:--} ${SDATA:--} ${MSG}\n");
+};
+
+
+# define a tcp output (to Logmatic.io here)
+destination d_logmatic { 
+    network(
+        "api.logmatic.io"
+        port(10514)
+        template(LogmaticFormat)
+        flags(no-multi-line) # force syslog-ng to send without \n char. Here newlines are replace with tabs.
+    );
+};
 
 source s_files {
   file(
@@ -107,6 +144,11 @@ source s_files {
 };
 
 ```
+
+Here, the output events received by Logmatic.io. Note that the newlines have been replace by tabs.
+![syslog-ng @ logmatic.io](img/syslog-ng-output.png)
+
+
 
 
 ### Fluentd
