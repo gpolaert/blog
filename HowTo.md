@@ -21,7 +21,9 @@ are contiguous. In this post, I won't show you how to do when multiple events ar
 3. We don't focus to the event output.
 
 
-### Input events (PostgreSQL/Java)
+### Input logs/events
+#### PostgreSQL
+##### Configure your PostgreSQL database
 In order to reproduce examples, you have to configure the log section in PostgreSQL. Edit
 `$PG_DATA/postgresql.conf` and add/replace the following section:
 ```properties
@@ -49,7 +51,7 @@ log_line_prefix = '%t postgres[%p]: '
 
 Then restart your postgres server.
 
-## Parse PostgreSQL multi-lines
+
 Before start, let's see how logs look like, `tail $PG_DATA/pg_log/postgresql.log`.
 
 ```sql
