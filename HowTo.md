@@ -6,7 +6,7 @@ In this post, I'm going to show how handle multi lines with the common log shipp
 * syslog-ng
 * fluentd
 * logstash
-* nxlo (soon)
+* nxlog (soon)
 
 
 I will illustrated each shippers with two common examples: Java error stacks (soon) and PostgreSQL log events.
