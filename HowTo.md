@@ -137,6 +137,7 @@ Here, the output events received by Logmatic.io.
 
 
 
+
 Note that the newlines have been replace by `\\n`.
 
 ```json
@@ -249,7 +250,12 @@ On the above input, this configuration
 Will produce these events
 
 ```json
-
+{
+  "custom": {
+    "severity": "STATEMENT",
+    "message": "select\t  sum(bar) as total\n\tfrom\n\t  foo my_table\n\twhere\n\t "
+  }
+}
 ```
 ### Logstash
 
