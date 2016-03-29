@@ -9,6 +9,7 @@ In this post, I'm going to show how handle multi-lines log with the common log s
 * nxlog (soon)
 
 
+
 I will illustrated each shippers with two common examples: Java error stacks (soon) and PostgreSQL log events.  Java and Postgres are quite good produces multi-lines logs, for SQL queries, or for THE NullPointerException.
 
 
