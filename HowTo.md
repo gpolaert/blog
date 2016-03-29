@@ -1,7 +1,7 @@
-# Multi-line support
+# Manage log multi-lines 
 
 ## What will try to do?
-In this post, I'm going to show how handle multi lines with the common log shippers:
+In this post, I'm going to show how handle multi-lines log with the common log shippers:
 * rsyslog,
 * syslog-ng
 * fluentd
@@ -9,11 +9,10 @@ In this post, I'm going to show how handle multi lines with the common log shipp
 * nxlog (soon)
 
 
-I will illustrated each shippers with two common examples: Java error stacks (soon) and PostgreSQL log events.
-Java and Postgres are quite good produces multi-line logs, for SQL queries, or for THE NullPointerException.
-Parsing multi-line to collect them into a single event can be rapidly a nightmare.
+I will illustrated each shippers with two common examples: Java error stacks (soon) and PostgreSQL log events.  Java and Postgres are quite good produces multi-lines logs, for SQL queries, or for THE NullPointerException.
 
-So, don't panic and take a seat. Debugging and monitoring should be more pleasant soon.
+
+Parsing multi-line to collect them into a single event can be rapidly a nightmare. So, don't panic and take a seat: Debugging and monitoring should be more pleasant in few minutes.
 
 Before start, let's talk about some prerequisites and context if you want to reproduce examples.
 1. All logs are written into a file. I mainly use a `tail-like` command.
