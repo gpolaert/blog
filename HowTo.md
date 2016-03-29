@@ -1,19 +1,20 @@
-# Multi-line support
+# Manage log multi-lines 
 
 ## What will try to do?
-In this post, I'm going to show how handle multi lines with the common log shippers:
+In this post, I'm going to show how handle multi-lines log with the common log shippers:
 * rsyslog,
 * syslog-ng
 * fluentd
 * logstash
-* nxlo (soon)
+* nxlog (soon)
+
+_`todo:` insert table content_
 
 
-I will illustrated each shippers with two common examples: Java error stacks (soon) and PostgreSQL log events.
-Java and Postgres are quite good produces multi-line logs, for SQL queries, or for THE NullPointerException.
-Parsing multi-line to collect them into a single event can be rapidly a nightmare.
+I will illustrated each shippers with two common examples: Java error stacks (soon) and PostgreSQL log events.  Java and Postgres are quite good produces multi-lines logs, for SQL queries, or for THE NullPointerException.
 
-So, don't panic and take a seat. Debugging and monitoring should be more pleasant soon.
+
+Parsing multi-line to collect them into a single event can be rapidly a nightmare. So, don't panic and take a seat: Debugging and monitoring should be more pleasant in few minutes.
 
 Before start, let's talk about some prerequisites and context if you want to reproduce examples.
 1. All logs are written into a file. I mainly use a `tail-like` command.
@@ -22,7 +23,9 @@ are contiguous. In this post, I won't show you how to do when multiple events ar
 3. We don't focus to the event output.
 
 
-### Input events (PostgreSQL/Java)
+### Input logs/events
+#### PostgreSQL setup
+**Configure your PostgreSQL database**
 In order to reproduce examples, you have to configure the log section in PostgreSQL. Edit
 `$PG_DATA/postgresql.conf` and add/replace the following section:
 ```properties
@@ -50,7 +53,9 @@ log_line_prefix = '%t postgres[%p]: '
 
 Then restart your postgres server.
 
-## Parse PostgreSQL multi-lines
+** PostgreSQL output**
+
+
 Before start, let's see how logs look like, `tail $PG_DATA/pg_log/postgresql.log`.
 
 ```sql
@@ -76,8 +81,34 @@ where
 2016-03-21 11:22:10 UTC postgres[423]: DEBUG:  StartTransaction
 ...
 ```
+#### Java setup
+Actually, the only thing is to write your logs to a file, using Log4j or another framework.
+Here, the error will try to parse:
+```
+2014-11-23 23:25:20,740 WARN org.apache.hadoop.util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+2014-11-23 23:25:21,569 WARN org.apache.hadoop.metrics2.impl.MetricsSystemImpl: Source name ugi already exists!
+2014-11-23 23:25:21,727 INFO org.apache.hadoop.mapred.Task:  Using ResourceCalculatorPlugin : null
+2014-11-23 23:25:21,759 INFO org.apache.hadoop.mapred.MapTask: Processing split: hdfs://localhost/user/oladotunopasina/redfilterinput/31b5ea5d982cf2b8b4ce27744d812d285b9e3.jpg:0+684033
+2014-11-23 23:25:21,778 INFO org.apache.hadoop.mapred.MapTask: io.sort.mb = 100
+2014-11-23 23:25:22,119 INFO org.apache.hadoop.mapred.MapTask: data buffer = 79691776/99614720
+2014-11-23 23:25:22,119 INFO org.apache.hadoop.mapred.MapTask: record buffer = 262144/327680
+2014-11-23 23:25:22,222 INFO org.apache.hadoop.mapred.TaskLogsTruncater: Initializing logs' truncater with mapRetainSize=-1 and reduceRetainSize=-1
+2014-11-23 23:25:22,481 WARN org.apache.hadoop.mapred.Child: Error running child
+java.lang.NullPointerException
+    at org.apache.hadoop.io.serializer.SerializationFactory.getSerializer(SerializationFactory.java:73)
+    at org.apache.hadoop.mapred.MapTask$MapOutputBuffer.<init>(MapTask.java:970)
+    at org.apache.hadoop.mapred.MapTask$NewOutputCollector.<init>(MapTask.java:673)
+    at org.apache.hadoop.mapred.MapTask.runNewMapper(MapTask.java:756)
+    at org.apache.hadoop.mapred.MapTask.run(MapTask.java:364)
+    at org.apache.hadoop.mapred.Child$4.run(Child.java:255)
+    at java.security.AccessController.doPrivileged(Native Method)
+    at javax.security.auth.Subject.doAs(Subject.java:394)
+    at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1190)
+    at org.apache.hadoop.mapred.Child.main(Child.java:249)
+2014-11-23 23:25:22,485 INFO org.apache.hadoop.mapred.Task: Runnning cleanup for the task
+```
 
-
+## Shipper configuration
 ### RSyslog (since v8.10.0)
 Multi-line support is recent and required at minium the 8.10.0 rsyslog version.
 Before start, check the version with `rsyslogd -v`.
@@ -103,6 +134,7 @@ input(type="imfile"
 
 Here, the output events received by Logmatic.io.
 ![syslog-ng @ logmatic.io](img/rsyslog-output.png)
+
 
 
 
@@ -218,7 +250,12 @@ On the above input, this configuration
 Will produce these events
 
 ```json
-
+{
+  "custom": {
+    "severity": "STATEMENT",
+    "message": "select\t  sum(bar) as total\n\tfrom\n\t  foo my_table\n\twhere\n\t "
+  }
+}
 ```
 ### Logstash
 
