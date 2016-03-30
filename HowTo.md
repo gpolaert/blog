@@ -156,6 +156,19 @@ Note that the newlines have been replace by `\\n`.
 
 ```
 
+Rsyslog '\n'
+
+To replace escaped \n by a space, you need to change the configuration as follow.
+
+```
+$template ...  %msg:::space-cc%\n"
+...
+  Severity="info"
+  escapeLF="off"
+  startmsg.regex="^((STATEMENT)|(LOG)|(DEBUG)|(FATAL)|(ERROR)|(WARNING)|([A-Z]+)): "
+...
+```
+
 ### Syslog-ng
 
 Syslog-ng works similar to rsyslog.
