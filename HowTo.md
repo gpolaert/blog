@@ -47,8 +47,6 @@ log_min_messages = debug3
 log_min_error_statement = debug3
 log_min_duration_statement = 0
 
-# Customize log prefix
-log_line_prefix = '%t postgres[%p]: '
 ```
 
 Then restart your postgres server.
