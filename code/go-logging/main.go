@@ -11,17 +11,17 @@ func main() {
 	logger.Formatter = &logrus.JSONFormatter{}
 
 	// a new instance of my Logger bind to the Logrus "logger"
-	argLogger := logging.NewArgLogger(logger)
+	argsLogger := logging.NewArgsLogger(logger)
 
 	//opts := os.Args
 	// checking your opts ...
 
 	// And logs all things that go wrong :)
 	// an opt is missing ...
-	argLogger.MissingArg("fizz")
+	argsLogger.MissingArg("fizz")
 
 	// here, the value is not valid ...
-	argLogger.InvalidArgValue("buzz", 12)
+	argsLogger.InvalidArgValue("buzz", 12)
 
 
 	/// OUTPUT
