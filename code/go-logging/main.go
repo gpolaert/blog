@@ -7,11 +7,11 @@ import (
 
 func main() {
 
-	l := logrus.New()
-	l.Formatter = &logrus.JSONFormatter{}
+	logger := logrus.New()
+	logger.Formatter = &logrus.JSONFormatter{}
 
-	// a new instance of my Logger bind to the "l" Logrus logger
-	argLogger := logging.NewArgLogger(l)
+	// a new instance of my Logger bind to the Logrus "logger"
+	argLogger := logging.NewArgLogger(logger)
 
 	//opts := os.Args
 	// checking your opts ...
