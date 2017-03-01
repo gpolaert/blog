@@ -26,7 +26,40 @@ Je vous invite à me rejoindre et découvrir quelques pratiques éprouvées
 
 ### Description
 
+(slides à venir/sur demande)
 
+L'enjeu de ce talk est de sensibiliser les participants au potentiel des logs.
+Le talk suit le plan suivant
+
+**Why? Pourquoi analyser et traiter les logs**
+
+* Developpement & Quality
+* Performance & Metrics =>
+* Security & Compliance
+* User behavior activity stream 
+
+**How? Comment standardiser/normaliser/industrialiser le logging**
+
+* Severity, Format and Normalisation => Json, best practices, multine line events, namming convention of most common fields and metrics
+* Standardization => code the message log // inspired from JBoss Logging Framework
+* Correlation basics & Tracing => adding meta and context to the log // inspired from Google Dapper paper and Zipkin
+* Centralize into one place => the syslog challenge
+
+**What? Quels informations**
+
+* Performance KPI and metrics => all things that can be charted (response time, change state)
+* Debug vs Security audit vs Forensics vs QoS, etc.
+* Real user Monitoring - Focus on the behavior
+
+*Inspiré de*
+
+* https://www.owasp.org/index.php/Log_review_and_management 
+* https://www.owasp.org/index.php/Error_Handling,_Auditing_and_Logging 
+* http://docs.oracle.com/javase/6/docs/technotes/guides/logging/overview.html
+* http://www.syslog.org
+* http://www.slideshare.net/anton_chuvakin/pci-dss-and-logging-what-you-need-to-know-by-dr-anton-chuvakin?qid=12b7d44f-27bc-4b0e-ae2a-efeb0362229b&v=&b=&from_search=11
+* https://wiki.opendaylight.org/view/BestPractices/Logging_Best_Practices 
+* http://wiki.c2.com/?LoggingBestPractices 
 
 ### Bio
 #### Summary
