@@ -64,7 +64,7 @@ Le talk suit le plan suivant
 ### Bio
 #### Summary
 Depuis quelques années l'écosystème Tech, je suis passionné par les analytics et les stratégies data-driven. 
-Étant que Log Evangelist, j’ai la chance d’être au contact de nombreux projets et entreprises.
+En tant que Log Evangelist, j’ai la chance d’être au contact de nombreux projets et entreprises.
 “Ma mission”, échanger autour du potentiel des data. Et plus particulièrement celui des logs.
 “Leur force”, être présent dans **TOUS** nos développements.
 
