@@ -9,14 +9,15 @@ import (
 	"io/ioutil"
 )
 
-var logger *logrus.Logger
+var logger *logrus.Entry
 
 func init() {
-	logger = logrus.New()
-
+	logrus.SetFormatter( &logrus.JSONFormatter{})
+	logrus.SetLevel(logrus.DebugLevel)
+	logger = logrus.WithField("appname", "go-logging")
 }
 
-const aResponseMessage = "hello world [microservive %d]\n\tsession: %s,\n\ttrack: %s,\n\tparent: %s\n-------\n"
+const aResponseMessage = "hello world from [microservive %d]\n\tsession: %s,\n\ttrack: %s,\n\tparent: %s\n-------\n"
 
 func helloMicroService1(w http.ResponseWriter, r *http.Request) {
 
@@ -48,6 +49,8 @@ func helloMicroService1(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("x-session", session)
 	w.Header().Set("x-track", track)
 
+	logger.WithField("session", session).WithField("track", track).Debugf("hello from ms 1")
+
 	// Write the response body
 	w.WriteHeader(http.StatusOK)
 	io.WriteString(w, fmt.Sprintf(aResponseMessage, 1, session, track, "") + string(m))
@@ -55,7 +58,6 @@ func helloMicroService1(w http.ResponseWriter, r *http.Request) {
 }
 
 func helloMicroService2(w http.ResponseWriter, r *http.Request) {
-
 
 	// Like for the microservice, we check the session and generate a new track
 	session := r.Header.Get("x-session")
@@ -74,6 +76,9 @@ func helloMicroService2(w http.ResponseWriter, r *http.Request) {
 	if (parent == "") {
 		w.Header().Set("x-parent", track)
 	}
+
+	logger.WithField("session", session).WithField("parent", parent).WithField("track", track).Debugf("hello from ms 2")
+
 
 	// Write the response body
 	w.WriteHeader(http.StatusOK)
@@ -110,6 +115,10 @@ func main() {
 	//	track: OYgSLPSs,
 	//	parent: uRKWsmZn
 	//-------
+
+	// {"appname":"go-logging","level":"debug","msg":"hello from ms 2","parent":"UzWHRihF","session":"eUBrVfdw","time":"2017-03-02T15:29:26+01:00","track":"DPRHBMuE"}
+	// {"appname":"go-logging","level":"debug","msg":"hello from ms 1","session":"eUBrVfdw","time":"2017-03-02T15:29:26+01:00","track":"UzWHRihF"}
+
 }
 
 func generateSessionId() string {
